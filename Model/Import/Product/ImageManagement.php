@@ -520,6 +520,10 @@ class ImageManagement extends AbstractManagement implements \Mash2\Cobby\Api\Imp
                     }
 
                     $attribute = $this->resource->getAttribute($key);
+                    // same code as m1, => fails with missing attribute, fix is to proof if attribute is existend
+                    if (!$attribute) {
+                        continue;
+                    }
                     $attrTable = $attribute->getBackend()->getTable();
                     $attrId = $attribute->getId();
                     $attributesData[$attrTable][$productId][$attrId][$storeId] = $file;
