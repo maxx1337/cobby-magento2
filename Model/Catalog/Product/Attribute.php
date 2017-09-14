@@ -7,6 +7,9 @@ namespace Mash2\Cobby\Model\Catalog\Product;
  */
 class Attribute implements \Mash2\Cobby\Api\CatalogProductAttributeInterface
 {
+    const ERROR_ATTRIBUTE_NOT_EXISTS = 'attribute_not_exists';
+    const ERROR_ATTRIBUTE_SET_NOT_EXISTS = 'attribute_set_not_exists';
+
     /**
      * @var \Magento\Catalog\Model\ResourceModel\Product\Attribute\Collection
      */
@@ -43,12 +46,20 @@ class Attribute implements \Mash2\Cobby\Api\CatalogProductAttributeInterface
      */
     public function export($attributeSetId = null, $attributeId = null)
     {
-        $result = array();
+        $attributesArray = array();
+        $noAttr = array();
+        $noAttrSet = array();
 
         if ($attributeId){
             $attribute = $this->productResource->getAttribute($attributeId);
 
-            $result[] = $this->getAttribute($attribute);
+            if (!$attribute) {
+                $noAttr[] = $attributeId;
+                $noAttr[] = self::ERROR_ATTRIBUTE_NOT_EXISTS;
+
+            }else  {
+                $attributesArray[] = $this->getAttribute($attribute);
+            }
         }
 
         if ($attributeSetId){
@@ -56,18 +67,24 @@ class Attribute implements \Mash2\Cobby\Api\CatalogProductAttributeInterface
                 ->setAttributeSetFilter($attributeSetId)
                 ->load();
 
-            foreach ($attributes as $attribute) {
-                $data = $this->getAttribute($attribute);
+            if (!$attributes->getItems()) {
+                $noAttrSet[] = $attributeSetId;
+                $noAttrSet[] = self::ERROR_ATTRIBUTE_SET_NOT_EXISTS;
+            } else {
+                foreach ($attributes as $attribute) {
+                    $data = $this->getAttribute($attribute);
 
-                $transportObject = new \Magento\Framework\DataObject();
-                $transportObject->setData($data);
+                    $transportObject = new \Magento\Framework\DataObject();
+                    $transportObject->setData($data);
 
-                $this->eventManager->dispatch('cobby_catalog_attribute_export_after', array(
-                    'attribute' => $attribute, 'transport' => $transportObject));
+                    $this->eventManager->dispatch('cobby_catalog_attribute_export_after', array(
+                        'attribute' => $attribute, 'transport' => $transportObject));
 
-                $result[] = $transportObject->getData();
+                    $attributesArray[] = $transportObject->getData();
+                }
             }
         }
+        $result = array_merge($noAttr, $noAttrSet, $attributesArray);
 
         return $result;
     }
