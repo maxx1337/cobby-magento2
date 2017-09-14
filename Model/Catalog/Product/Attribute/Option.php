@@ -95,12 +95,7 @@ class Option implements \Mash2\Cobby\Api\CatalogProductAttributeOptionInterface
         $attribute = $this->productResource->getAttribute($attributeId);
 
         if (!$attribute) {
-            $result[] = array(
-                'attribute_id' => $attributeId,
-                'options' => null,
-                'error_code' => \Mash2\Cobby\Model\Catalog\Product\Attribute::ERROR_ATTRIBUTE_NOT_EXISTS);
-
-            return $result;
+            throw new \Magento\Framework\Exception\NoSuchEntityException(__('Requested attribute doesn\'t exist'));
         }
 
         $options = $this->getOptions($attributeId);
@@ -203,7 +198,7 @@ class Option implements \Mash2\Cobby\Api\CatalogProductAttributeOptionInterface
             if (!$attribute) {
                 $result[] = array('attribute_id' => $attributeId,
                     'options' => null,
-                    'error_code' => self::ERROR_NOT_EXISTS);
+                    'error_code' => \Mash2\Cobby\Model\Catalog\Product\Attribute::ERROR_ATTRIBUTE_NOT_EXISTS);
             }
             else {
                 foreach ($row['options'] as $requestedOption) {
