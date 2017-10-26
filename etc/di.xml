@@ -78,4 +78,8 @@
         <plugin name="queue_customer_plugin_resource" type="Mash2\Cobby\Model\Plugin\Customer\Customer"/>
     </type>
 
+    <type name="Magento\Eav\Model\Entity\Attribute\OptionManagement">
+        <plugin name="addSwatchDataToAddOption" type="Mash2\Cobby\Model\Plugin\Catalog\AddSwatchDataToAddOption"/>
+    </type>
+
 </config>
